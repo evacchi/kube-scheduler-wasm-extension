@@ -10,18 +10,50 @@ import (
 )
 
 func main() {
+	if os.Args[1] == "w" {
+		write()
+	} else {
+		read()
+	}
+}
+
+func read() {
+	start := time.Now()
+	szB := make([]byte, 8)
+	os.Stdin.Read(szB)
+	sz := binary.LittleEndian.Uint64(szB)
+	bytes := make([]byte, sz)
+	os.Stdin.Read(bytes)
+	node := &protoapi.IoK8SApiCoreV1Node{}
+	node.UnmarshalVT(bytes)
+
+	szB = make([]byte, 8)
+	os.Stdin.Read(szB)
+	sz = binary.LittleEndian.Uint64(szB)
+
+	bytes = make([]byte, sz)
+	os.Stdin.Read(bytes)
+	podSpec := &protoapi.IoK8SApiCoreV1PodSpec{}
+	podSpec.UnmarshalVT(bytes)
+
+	elapsed := time.Since(start)
+	log.Printf("Elapsed: %s", elapsed)
+	log.Println(node.ApiVersion)
+	log.Println(podSpec.NodeName)
+}
+
+func write() {
 	start := time.Now()
 
 	node := makeNode()
 	bytes := marshall(node)
-	sz := binary.LittleEndian.AppendUint32(nil, uint32(len(bytes)))
+	sz := binary.LittleEndian.AppendUint64(nil, uint64(len(bytes)))
 	os.Stdout.Write(sz)
 	os.Stdout.Write(bytes)
 
 	pod := makePodSpec()
 	bytes = marshall(pod)
-	sz = binary.LittleEndian.AppendUint32(nil, uint32(len(bytes)))
-
+	sz = binary.LittleEndian.AppendUint64(nil, uint64(len(bytes)))
 	os.Stdout.Write(sz)
 	os.Stdout.Write(bytes)
 
@@ -78,6 +110,7 @@ func marshall(vt valueType) []byte {
 
 func makePodSpec() *protoapi.IoK8SApiCoreV1PodSpec {
 	return &protoapi.IoK8SApiCoreV1PodSpec{
+		NodeName: "Node1",
 		Volumes: []*protoapi.IoK8SApiCoreV1Volume{
 			{
 				Name: "volume1",
@@ -164,6 +197,7 @@ func makePodSpec() *protoapi.IoK8SApiCoreV1PodSpec {
 type valueType interface {
 	SizeVT() (n int)
 	MarshalToSizedBufferVT(dAtA []byte) (int, error)
+	UnmarshalVT(dAtA []byte) error
 }
 
 // nameEqualsPodSpec schedules this node if its name equals its pod spec.
