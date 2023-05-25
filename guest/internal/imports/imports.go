@@ -1,4 +1,4 @@
-//go:build tinygo.wasm
+//go:build _tinygo.wasm
 
 package imports
 
