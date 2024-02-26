@@ -19,9 +19,9 @@ package wasm
 import (
 	"context"
 	"fmt"
-
 	"github.com/tetratelabs/wazero"
 	"github.com/tetratelabs/wazero/api"
+	"github.com/tetratelabs/wazero/experimental/opt"
 	"github.com/tetratelabs/wazero/imports/wasi_snapshot_preview1"
 	"k8s.io/kubernetes/pkg/scheduler/framework"
 )
@@ -29,11 +29,12 @@ import (
 // prepareRuntime compiles the guest and instantiates any host modules it needs.
 func prepareRuntime(ctx context.Context, guestBin []byte, logSeverity int32, guestConfig string, handle framework.Handle) (runtime wazero.Runtime, guest wazero.CompiledModule, err error) {
 	// Create the runtime, which when closed releases any resources associated with it.
-	runtime = wazero.NewRuntimeWithConfig(ctx, wazero.NewRuntimeConfig().
-		// Here are settings required by the wasm profiler wzprof:
-		// * DebugInfo is already true by default, so no impact.
-		// * CustomSections buffers more data into memory at compile time.
-		WithDebugInfoEnabled(true).WithCustomSections(true))
+	runtime = wazero.NewRuntimeWithConfig(ctx,
+		opt.NewRuntimeConfigOptimizingCompiler())
+	// Here are settings required by the wasm profiler wzprof:
+	// * DebugInfo is already true by default, so no impact.
+	// * CustomSections buffers more data into memory at compile time.
+	//WithDebugInfoEnabled(true).WithCustomSections(true))
 
 	// Close the runtime on any error
 	defer func() {

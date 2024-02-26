@@ -199,3 +199,5 @@ replace (
 
 	sigs.k8s.io/kube-scheduler-wasm-extension/scheduler => ../../scheduler
 )
+
+replace github.com/tetratelabs/wazero => /Users/evacchi/Devel/github.com/tetratelabs/wazero

@@ -56,7 +56,7 @@ profile: examples/advanced/main-debug.wasm
 
 .PHONY: bench-example
 bench-example:
-	@(cd internal/e2e/scheduler; go test -run='^$$' -bench '^BenchmarkExample.*$$' . -count=6)
+	@(cd internal/e2e/scheduler; go test -run='^$$' -bench '^BenchmarkExample.*$$' . -count=6 -tags=perfmap )
 
 .PHONY: scheduler-perf
 scheduler-perf:
